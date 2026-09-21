@@ -1,55 +1,65 @@
-export default async function handler(req, res) {
-  // 處理前端的 CORS 標頭
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+// api/fetch.js
+export const config = {
+  runtime: 'edge', // 強制指定使用 Vercel Edge 環境，速度最快且最不易出錯
+};
 
+export default async function handler(req) {
+  // 設定 CORS 標頭，允許你的前端讀取
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // 處理瀏覽器的預檢請求 (Preflight)
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  // 🎯 修改點一：確保網址是直接指向該商品的真實網址
-  const TARGET_URL = 'https://kmonstar.com.tw'; 
+  // 🎯 K-Monstar 商品官網真實網址
+  const TARGET_URL = 'https://kmonstar.com.tw';
 
   try {
-    // 🎯 修改點二：偽裝成完整的 Chrome 瀏覽器標頭，繞過安全防護與 408 阻擋
+    // 偽裝 Chrome 瀏覽器發出請求，繞過電商 408 阻擋
     const response = await fetch(TARGET_URL, {
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Sec-Ch-Ua': '"Chromium";v="122", "Not(A:Brand)";v="24", "Google Chrome";v="122"',
-        'Sec-Ch-Ua-Mobile': '?0',
-        'Sec-Ch-Ua-Platform': '"Windows"',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1'
       }
     });
 
     if (!response.ok) {
-      throw new Error(`K-Monstar 伺服器拒絕回應，狀態碼: ${response.status}`);
+      return new Response(
+        JSON.stringify({ error: `K-Monstar 回應錯誤，狀態碼: ${response.status}` }), 
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // 🎯 修改點三：因為對方可能直接回傳網頁 HTML 而不是 JSON API，我們先以文字收錄
     const htmlText = await response.text();
-    
-    // 如果對方是純 JSON API，可以直接嘗試 parse
+
+    // 試圖判斷是否為 JSON，若不是則以 HTML 格式回傳
+    let bodyData;
     try {
-      const jsonData = JSON.parse(htmlText);
-      return res.status(200).json(jsonData);
+      bodyData = JSON.stringify(JSON.parse(htmlText));
     } catch (e) {
-      // 如果回傳的是整頁網頁 HTML，後端可以直接把網頁文字丟給前端處理
-      return res.status(200).json({ mode: "html", content: htmlText });
+      bodyData = JSON.stringify({ mode: "html", content: htmlText });
     }
+
+    return new Response(bodyData, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    });
 
   } catch (error) {
-    return res.status(500).json({ error: '代理伺服器抓取超時或失敗', details: error.message });
+    return new Response(
+      JSON.stringify({ error: '後端抓取失敗', details: error.message }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 }

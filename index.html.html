@@ -54,7 +54,6 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -77,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Global Status & Controls -->
             <div class="flex items-center flex-wrap gap-3">
                 <div id="connection-status" class="flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-400 shadow-inner">
                     <span class="relative flex h-2 w-2">
@@ -97,7 +95,7 @@
 
     <main class="max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 space-y-6 flex-grow">
 
-        <!-- Error Alert Banner (Hidden by Default) -->
+        <!-- Error Alert Banner -->
         <div id="error-banner" class="hidden bg-red-950/80 border border-red-500/40 p-4 rounded-xl text-red-200 flex items-start space-x-3 shadow-lg">
             <i class="fa-solid fa-triangle-exclamation text-red-400 text-lg mt-0.5"></i>
             <div class="flex-1">
@@ -136,8 +134,7 @@
         </div>
 
         <!-- Metric Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <!-- Total Sold Card -->
             <div class="glass-card rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-slate-600 transition">
                 <div class="absolute -right-6 -bottom-6 text-slate-800/40 text-7xl font-bold select-none pointer-events-none group-hover:scale-110 transition">
@@ -153,7 +150,7 @@
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-xs text-slate-400">
-                    <span class="text-emerald-400 font-semibold mr-1.5 flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 實時</span> 來自 variants[0].total_sold
+                    <span class="text-emerald-400 font-semibold mr-1.5 flex items-center"><i class="fa-solid fa-arrow-trend-up mr-1"></i> 實時</span> 來自 variants 商品數據加總
                 </div>
             </div>
 
@@ -172,387 +169,8 @@
                     </div>
                 </div>
                 <div class="mt-4 flex items-center text-xs text-slate-400">
-                    <span id="delta-status-desc" class="text-slate-300">監測中，等待新訂單...</span>
+                    <span id="delta-status-desc" class="text-slate-300">目前數據保持穩定</span>
                 </div>
             </div>
 
-            <!-- Inventory Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-slate-600 transition">
-                <div class="absolute -right-6 -bottom-6 text-slate-800/40 text-7xl font-bold select-none pointer-events-none group-hover:scale-110 transition">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">當前庫存數量</p>
-                        <h3 id="inventory-qty" class="text-3xl sm:text-4xl font-extrabold text-amber-400 mt-2 tracking-tight">--</h3>
-                    </div>
-                    <div class="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 text-amber-400">
-                        <i class="fa-solid fa-warehouse text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-xs text-slate-400">
-                    <span class="text-slate-400">variants[0].inventory_quantity</span>
-                </div>
-            </div>
-
-            <!-- Total Revenue / Estimate Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-xl relative overflow-hidden group hover:border-slate-600 transition">
-                <div class="absolute -right-6 -bottom-6 text-slate-800/40 text-7xl font-bold select-none pointer-events-none group-hover:scale-110 transition">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">預估總銷售額 (TWD)</p>
-                        <h3 id="est-revenue" class="text-2xl sm:text-3xl font-extrabold text-purple-400 mt-2 tracking-tight">NT$ --</h3>
-                    </div>
-                    <div class="bg-purple-500/10 p-3 rounded-xl border border-purple-500/20 text-purple-400">
-                        <i class="fa-solid fa-dollar-sign text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center text-xs text-slate-400">
-                    <span class="text-slate-400">以單價 $750 計算預估</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Charts and Logs Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Chart Container (Takes up 2 columns on lg) -->
-            <div class="glass-card rounded-2xl p-5 shadow-xl lg:col-span-2 flex flex-col justify-between">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-sm text-slate-200 flex items-center">
-                        <i class="fa-solid fa-wave-square text-emerald-400 mr-2"></i> 銷售趨勢與即時變化圖表
-                    </h3>
-                    <span class="text-xs text-slate-400">最近 20 筆輪詢記錄</span>
-                </div>
-                <div class="relative w-full h-72 sm:h-80">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Recent Activity / Logs Container -->
-            <div class="glass-card rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-                <div>
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-sm text-slate-200 flex items-center">
-                            <i class="fa-solid fa-list-check text-blue-400 mr-2"></i> 銷售動態紀錄
-                        </h3>
-                        <button onclick="clearLogs()" class="text-xs text-slate-400 hover:text-slate-200 transition">清除記錄</button>
-                    </div>
-                    <div id="logs-container" class="space-y-2.5 overflow-y-auto max-h-72 sm:h-80 pr-1 text-xs">
-                        <div class="text-slate-500 text-center py-8">尚未有銷售變動紀錄，正在等待資料更新...</div>
-                    </div>
-                </div>
-                <div class="mt-4 pt-3 border-t border-slate-800 text-center text-[11px] text-slate-500">
-                    提示：當偵測到銷量上升時，系統會自動高亮記錄。
-                </div>
-            </div>
-
-        </div>
-
-    </main>
-
-    <footer class="bg-slate-900/80 border-t border-cardBorder py-4 px-6 text-center text-xs text-slate-400">
-        <p>K-Monstar Sales Monitor Dashboard &copy; 2026. Designed for real-time album release event tracking.</p>
-    </footer>
-
-    <script>
-        // Target API URL
-        const API_URL = "/api/fetch";
-
-        // State Variables
-        let previousTotalSold = null;
-        let currentTotalSold = null;
-        let countdownTime = 15;
-        let countdownTimerId = null;
-        let pollingTimerId = null;
-        let chartInstance = null;
-        let chartLabels = [];
-        let chartDataSold = [];
-        let chartDataDelta = [];
-        let isFirstFetch = true;
-        let estimatedUnitPrice = 750; // Estimated default TWD price per item
-
-        // DOM Elements
-        const titleEl = document.getElementById('product-title');
-        const totalSoldEl = document.getElementById('total-sold');
-        const salesDeltaEl = document.getElementById('sales-delta');
-        const inventoryQtyEl = document.getElementById('inventory-qty');
-        const estRevenueEl = document.getElementById('est-revenue');
-        const lastUpdatedEl = document.getElementById('last-updated');
-        const countdownTimerEl = document.getElementById('countdown-timer');
-        const progressBarEl = document.getElementById('progress-bar');
-        const errorBannerEl = document.getElementById('error-banner');
-        const errorMessageEl = document.getElementById('error-message');
-        const logsContainerEl = document.getElementById('logs-container');
-        const statusTextEl = document.getElementById('status-text');
-        const connectionStatusEl = document.getElementById('connection-status');
-        const refreshIconEl = document.getElementById('refresh-icon');
-
-        // Initialize Chart.js
-        function initChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: [
-                        {
-                            label: '累積總銷量 (Total Sold)',
-                            data: chartDataSold,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.3,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: '15秒銷量變化 (Δ Sales)',
-                            data: chartDataDelta,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            borderWidth: 2,
-                            type: 'bar',
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#94a3b8',
-                                font: { family: 'Inter', size: 11 }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: '#64748b', font: { size: 10 } },
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' }
-                        },
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            ticks: { color: '#10b981', font: { size: 10 } },
-                            grid: { color: 'rgba(51, 65, 85, 0.3)' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#3b82f6', font: { size: 10 }, min: 0 }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Fetch Data Function with CORS Handling & Fallback
-        async function fetchSalesData() {
-            refreshIconEl.classList.add('fa-spin');
-            const timestamp = new Date().getTime();
-            const requestUrl = `${API_URL}?_t=${timestamp}`;
-
-            try {
-                // Try direct fetch first
-                let response;
-                try {
-                    response = await fetch(requestUrl, { mode: 'cors' });
-                } catch (directErr) {
-                    // If direct fetch fails due to CORS or network, use public CORS proxy as robust fallback
-                    console.warn("Direct fetch failed, trying via CORS proxy...", directErr);
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(requestUrl)}`;
-                    response = await fetch(proxyUrl);
-                }
-
-                if (!response.ok) {
-                    throw new Error(`伺服器回應狀態碼錯誤: ${response.status}`);
-                }
-
-                const data = await response.json();
-                parseAndUpdateData(data);
-                hideError();
-                updateConnectionStatus(true);
-
-            } catch (err) {
-                console.error("API 抓取失敗:", err);
-                showError(`無法載入即時資料 (${err.message})。可能受到瀏覽器 CORS 限制，系統將維持計時並自動重試。`);
-                updateConnectionStatus(false);
-            } finally {
-                refreshIconEl.classList.remove('fa-spin');
-            }
-        }
-
-        // Parse JSON data and update DOM & Charts
-        function parseAndUpdateData(data) {
-            // Extract fields based on requirements
-            const title = data.title || "未知商品名稱";
-            const variant = data.variants && data.variants[0] ? data.variants[0] : {};
-            const totalSold = typeof variant.total_sold === 'number' ? variant.total_sold : parseInt(variant.total_sold || 0, 10);
-            const inventoryQty = typeof variant.inventory_quantity === 'number' ? variant.inventory_quantity : parseInt(variant.inventory_quantity || 0, 10);
-
-            titleEl.textContent = title;
-            totalSoldEl.textContent = totalSold.toLocaleString();
-            inventoryQtyEl.textContent = inventoryQty.toLocaleString();
-            estRevenueEl.textContent = `NT$ ${(totalSold * estimatedUnitPrice).toLocaleString()}`;
-
-            const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
-            lastUpdatedEl.textContent = timeString;
-
-            // Calculate Delta (Difference from previous fetch)
-            let delta = 0;
-            if (!isFirstFetch && previousTotalSold !== null) {
-                delta = totalSold - previousTotalSold;
-            } else if (isFirstFetch) {
-                delta = 0;
-                isFirstFetch = false;
-            }
-
-            // Update Delta UI with animation if increased
-            salesDeltaEl.textContent = (delta > 0 ? `+${delta}` : delta);
-            if (delta > 0) {
-                salesDeltaEl.classList.add('animate-flash-green');
-                setTimeout(() => salesDeltaEl.classList.remove('animate-flash-green'), 1000);
-                addLogEntry(timeString, totalSold, delta, 'increase');
-            } else if (delta < 0) {
-                addLogEntry(timeString, totalSold, delta, 'decrease');
-            } else {
-                addLogEntry(timeString, totalSold, delta, 'normal');
-            }
-
-            // Save current to previous
-            previousTotalSold = totalSold;
-
-            // Update Chart Data (Keep last 20 records)
-            if (chartLabels.length >= 20) {
-                chartLabels.shift();
-                chartDataSold.shift();
-                chartDataDelta.shift();
-            }
-            chartLabels.push(timeString);
-            chartDataSold.push(totalSold);
-            chartDataDelta.push(delta);
-            if (chartInstance) {
-                chartInstance.update();
-            }
-        }
-
-        // Add Log Entry to Activity Feed
-        function addLogEntry(timeStr, total, delta, type) {
-            // Remove placeholder if present
-            if (logsContainerEl.querySelector('.text-center')) {
-                logsContainerEl.innerHTML = '';
-            }
-
-            const logItem = document.createElement('div');
-            logItem.className = `p-2.5 rounded-lg border flex items-center justify-between transition ${
-                type === 'increase' 
-                    ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300' 
-                    : 'bg-slate-900/60 border-slate-800 text-slate-300'
-            }`;
-
-            let badgeHtml = '';
-            if (delta > 0) {
-                badgeHtml = `<span class="bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded text-xs">+${delta} 件</span>`;
-            } else if (delta < 0) {
-                badgeHtml = `<span class="bg-red-500/20 text-red-400 font-bold px-2 py-0.5 rounded text-xs">${delta} 件</span>`;
-            } else {
-                badgeHtml = `<span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded text-xs">無變動</span>`;
-            }
-
-            logItem.innerHTML = `
-                <div class="flex items-center space-x-2">
-                    <span class="font-mono text-slate-400 text-[11px]">${timeStr}</span>
-                    <span class="font-medium">總銷量: ${total}</span>
-                </div>
-                ${badgeHtml}
-            `;
-
-            logsContainerEl.insertBefore(logItem, logsContainerEl.firstChild);
-
-            // Limit logs DOM to 50 items
-            if (logsContainerEl.children.length > 50) {
-                logsContainerEl.removeChild(logsContainerEl.lastChild);
-            }
-        }
-
-        // Clear logs
-        function clearLogs() {
-            logsContainerEl.innerHTML = '<div class="text-slate-500 text-center py-8">記錄已清除。</div>';
-        }
-
-        // Error handling helpers
-        function showError(msg) {
-            errorMessageEl.textContent = msg;
-            errorBannerEl.classList.remove('hidden');
-        }
-
-        function dismissError() {
-            errorBannerEl.classList.add('hidden');
-        }
-
-        function updateConnectionStatus(isHealthy) {
-            if (isHealthy) {
-                connectionStatusEl.className = "flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-400 shadow-inner";
-                statusTextEl.textContent = "連線正常 (15秒輪詢)";
-            } else {
-                connectionStatusEl.className = "flex items-center space-x-2 bg-red-950/60 border border-red-500/30 px-3 py-1.5 rounded-full text-xs font-medium text-red-400 shadow-inner";
-                statusTextEl.textContent = "連線異常 (重試中)";
-            }
-        }
-
-        // Manual Refresh Button Click
-        function manualRefresh() {
-            resetCountdown();
-            fetchSalesData();
-        }
-
-        // Countdown Timer & Polling Logic (15 seconds)
-        function startTimers() {
-            // Initial fetch
-            fetchSalesData();
-
-            // Countdown interval (every 1 second)
-            countdownTimerId = setInterval(() => {
-                countdownTime--;
-                countdownTimerEl.textContent = `${countdownTime}s`;
-                
-                // Update progress bar width percentage
-                const percentage = (countdownTime / 15) * 100;
-                progressBarEl.style.width = `${percentage}%`;
-
-                if (countdownTime <= 0) {
-                    resetCountdown();
-                    fetchSalesData();
-                }
-            }, 1000);
-        }
-
-        function resetCountdown() {
-            countdownTime = 15;
-            countdownTimerEl.textContent = `${countdownTime}s`;
-            progressBarEl.style.width = '100%';
-        }
-
-        // Window Load Initialization
-        window.onload = function() {
-            initChart();
-            startTimers();
-        };
-    </script>
-
-</body>
-</html>
+            <!-- Stock Status Card -->

@@ -1,9 +1,0 @@
-{
-  "name": "k-monstar-monitor",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "build": "mkdir -p public && cp index.html public/ 2>/dev/null || cp index.html public/"
-  },
-  "dependencies": {}
-}
